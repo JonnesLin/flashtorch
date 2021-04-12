@@ -6,7 +6,7 @@ transformation.
 
 """
 from PIL import Image
-
+import torch
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
 
@@ -109,16 +109,14 @@ def denormalize(tensor):
             - W: width of the image
 
     """
-
+    
     means = [0.485, 0.456, 0.406]
     stds = [0.229, 0.224, 0.225]
-
-    denormalized = tensor.clone()
-
-    for channel, mean, std in zip(denormalized[0], means, stds):
-        channel.mul_(std).add_(mean)
-
-    return denormalized
+    
+    out = torch.randn(tensor.shape)
+    for idx, (channel, mean, std) in enumerate(zip(tensor[0], means, stds)):
+        out[0][idx] = channel.mul(std).add(mean)
+    return out
 
 
 def standardize_and_clip(tensor, min_value=0.0, max_value=1.0,
